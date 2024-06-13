@@ -13,7 +13,7 @@ $ cc -o cobfus src/cobfus.c
 $ ./cobfus <input_file> [-o <output_file>] [-l <target_ln_len>] [-i ...]
 ```
 
-Flags:
+### Flags
 
 - `-o`: output file (default is `<input_file>.obfus`)
 - `-l`: target line len (in chars) - the obfuscator will try to keep this line len
