@@ -21,4 +21,4 @@ $ ./cobfus <input_file> [-o <output_file>] [-l <target_ln_len>] [-i ...]
 
 ## Known bugs
 
-Because `stb_c_lexer` isn't yet fully implemented, some inputs may not work or produce undesired results.
+Because `stb_c_lexer` isn't yet fully implemented, some inputs may crash or produce undesired results.
