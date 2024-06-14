@@ -144,9 +144,6 @@ struct StrBuf obfuscate(char *buf, int buf_size, int target_ln_len) {
     int tok_len = lexer.where_lastchar - lexer.where_firstchar + 1;
     int tok_ty = lexer.token;
 
-    printf("Tok: %.*s\n", tok_len, tok);
-    getc(stdin);
-
     // TODO: skip int
 
     /* if (tok_len == 3 && strncmp(tok, "int", 3) == 0) */
