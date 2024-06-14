@@ -30,7 +30,8 @@ char *ignored_c_keywords[] = {"alignas",       "alignof",       "auto",
                               "thread_local",  "true",          "typedef",
                               "typeof",        "typeof_unqual", "union",
                               "unsigned",      "void",          "volatile",
-                              "while"};
+                              "while",         "stderr",        "stdout",
+                              "stdin",         "FILE"};
 
 char *ignored_c_funcs[] = {
     "main",   "abs",     "atoi",   "atof",   "bsearch", "ceil",    "clock",
@@ -66,29 +67,15 @@ void str_buf_append(struct StrBuf *buf, char *str, int str_len) {
 
 void str_buf_free(struct StrBuf *buf) { free(buf->str); }
 
-int add_renamed_id(char *id, int id_len, struct StrBuf *buf) {
-  int found_off = -1;
+int find_renamed_id(char *id, int id_len) {
   for (int i = 0; i < conv_table_len; i++) {
     if (conv_table[i].id_len != id_len)
       continue;
     if (strncmp(conv_table[i].id, id, id_len) == 0) {
-      found_off = i;
-      break;
+      return i;
     }
   }
-
-  char tmp[10];
-  if (found_off != -1) {
-    int len = snprintf(tmp, 10, "_%d", found_off);
-    str_buf_append(buf, tmp, len);
-    return len;
-  }
-
-  conv_table[conv_table_len] = (struct ConvTableEntry){id, id_len};
-  int len = snprintf(tmp, 10, "_%d", conv_table_len);
-  conv_table_len++;
-  str_buf_append(buf, tmp, len);
-  return len;
+  return -1;
 }
 
 // TODO: binary search
@@ -144,6 +131,18 @@ struct StrBuf obfuscate(char *buf, int buf_size, int target_ln_len) {
     int tok_len = lexer.where_lastchar - lexer.where_firstchar + 1;
     int tok_ty = lexer.token;
 
+    char tmp[256];
+
+    if (tok_ty == CLEX_id && can_rename_id(tok, tok_len)) {
+      int found_off = find_renamed_id(tok, tok_len);
+      if (found_off == -1) {
+        found_off = conv_table_len;
+        conv_table[conv_table_len++] = (struct ConvTableEntry){tok, tok_len};
+      }
+      tok_len = snprintf(tmp, 10, "_%d", found_off);
+      tok = tmp;
+    }
+
     // TODO: skip int
 
     /* if (tok_len == 3 && strncmp(tok, "int", 3) == 0) */
@@ -152,23 +151,13 @@ struct StrBuf obfuscate(char *buf, int buf_size, int target_ln_len) {
     if (target_ln_len != 0 && curr_ln_len + tok_len > target_ln_len) {
       curr_ln_len = 0;
       str_buf_append(&str, "\n", 1);
-    } else {
-      if (should_emit_space(tok_ty, prev_tok_ty)) {
-        str_buf_append(&str, " ", 1);
-        tok_len += 1;
-      }
-    }
-
-    if (tok_ty == CLEX_id) {
-      if (can_rename_id(tok, tok_len)) {
-        tok_len = add_renamed_id(tok, tok_len, &str); // new len
-        goto increase;
-      }
+    } else if (should_emit_space(tok_ty, prev_tok_ty)) {
+      str_buf_append(&str, " ", 1);
+      curr_ln_len += 1;
     }
 
     str_buf_append(&str, tok, tok_len);
 
-  increase:
     curr_ln_len += tok_len;
     prev_tok_ty = tok_ty;
   }
