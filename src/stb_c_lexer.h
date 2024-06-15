@@ -94,11 +94,11 @@
   N // letters after numbers are parsed as part of those numbers, and must be in
     // suffix list below
 #define STB_C_LEX_DECIMAL_SUFFIXES                                             \
-  "" // decimal integer suffixes e.g. "uUlL" -- these are returned as-is in
-     // string storage
-#define STB_C_LEX_HEX_SUFFIXES ""   // e.g. "uUlL"
-#define STB_C_LEX_OCTAL_SUFFIXES "" // e.g. "uUlL"
-#define STB_C_LEX_FLOAT_SUFFIXES "" //
+  "uUlL" // decimal integer suffixes e.g. "uUlL" -- these are returned as-is in
+         // string storage
+#define STB_C_LEX_HEX_SUFFIXES "lL"     // e.g. "uUlL"
+#define STB_C_LEX_OCTAL_SUFFIXES "lL"   // e.g. "uUlL"
+#define STB_C_LEX_FLOAT_SUFFIXES "uulL" //
 
 #define STB_C_LEX_0_IS_EOF                                                     \
   Y // if Y, ends parsing at '\0'; if N, returns '\0' as token

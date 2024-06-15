@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#define STB_C_LEXER_IMPLEMENTATION
 
+#define STB_C_LEXER_IMPLEMENTATION
 #include "stb_c_lexer.h"
 
 struct StrBuf {
@@ -31,15 +31,18 @@ char *ignored_c_keywords[] = {"alignas",       "alignof",       "auto",
                               "typeof",        "typeof_unqual", "union",
                               "unsigned",      "void",          "volatile",
                               "while",         "stderr",        "stdout",
-                              "stdin",         "FILE"};
+                              "stdin",         "FILE",          "SEEK_END",
+                              "SEEK_SET"};
 
-char *ignored_c_funcs[] = {
-    "main",   "abs",     "atoi",   "atof",   "bsearch", "ceil",    "clock",
-    "cos",    "exit",    "fclose", "fgets",  "fopen",   "fprintf", "fputs",
-    "fread",  "free",    "fwrite", "floor",  "malloc",  "memcpy",  "memmove",
-    "memset", "pow",     "printf", "qsort",  "rand",    "realloc", "scanf",
-    "sin",    "srand",   "sqrt",   "strcat", "strncat", "strcmp",  "strncmp",
-    "strcpy", "strncpy", "strlen", "system", "time"};
+char *ignored_c_funcs[] = {"main",    "abs",    "atoi",    "atof",   "bsearch",
+                           "ceil",    "clock",  "cos",     "exit",   "fclose",
+                           "fgets",   "fopen",  "fprintf", "fputs",  "fread",
+                           "free",    "fwrite", "floor",   "malloc", "memcpy",
+                           "memmove", "memset", "pow",     "printf", "snprintf",
+                           "qsort",   "fseek",  "ftell",   "rand",   "realloc",
+                           "scanf",   "sin",    "srand",   "sqrt",   "strcat",
+                           "strncat", "strcmp", "strncmp", "strcpy", "strncpy",
+                           "strlen",  "system", "time"};
 
 char *additional_ignored_syms[1024];
 int ignored_syms_len;
