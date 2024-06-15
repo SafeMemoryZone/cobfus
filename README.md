@@ -3,7 +3,7 @@ A simple C-obfuscator written in C.
 
 ## Example
 
-Obfuscated `donut.c`:
+Obfuscated (donut.c)[https://www.a1k0n.net/2011/07/20/donut-math.html]:
 
 ```c
 int _0;double sin(),cos();main(){float _1=0,_2=0,_3,_4,_5[1760];char _6[1760];printf("\x1b[2J");for(
