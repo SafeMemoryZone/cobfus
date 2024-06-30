@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define STB_C_LEXER_IMPLEMENTATION
-#include "stb_c_lexer.h"
+#define SLEX_IMPLEMENTATION
+#include "slex.h"
 
 struct StrBuf {
   char *str;
@@ -108,13 +109,13 @@ int can_rename_id(char *id, int id_len) {
 }
 
 int should_emit_space(int tok_ty1, int tok_ty2) {
-  int p1 = tok_ty1 == CLEX_id || tok_ty1 == CLEX_intlit ||
-           tok_ty1 == CLEX_floatlit || tok_ty1 == CLEX_dqstring ||
-           tok_ty1 == CLEX_sqstring;
+  int p1 = tok_ty1 == SLEX_TOK_identifier || tok_ty1 == SLEX_TOK_int_lit ||
+           tok_ty1 == SLEX_TOK_float_lit || tok_ty1 == SLEX_TOK_str_lit ||
+           tok_ty1 == SLEX_TOK_char_lit;
 
-  int p2 = tok_ty2 == CLEX_id || tok_ty2 == CLEX_intlit ||
-           tok_ty2 == CLEX_floatlit || tok_ty2 == CLEX_dqstring ||
-           tok_ty2 == CLEX_sqstring;
+  int p2 = tok_ty2 == SLEX_TOK_identifier || tok_ty2 == SLEX_TOK_int_lit ||
+           tok_ty2 == SLEX_TOK_float_lit || tok_ty2 == SLEX_TOK_str_lit ||
+           tok_ty2 == SLEX_TOK_char_lit;
 
   return p1 && p2;
 }
@@ -122,21 +123,30 @@ int should_emit_space(int tok_ty1, int tok_ty2) {
 struct StrBuf obfuscate(char *buf, int buf_size, int target_ln_len) {
   struct StrBuf str = {0};
 
-  stb_lexer lexer;
+  SlexContext lexer;
   char store[1024];
   int curr_ln_len = 0;
 
-  stb_c_lexer_init(&lexer, buf, NULL, store, 1024);
-  int prev_tok_ty = CLEX_parse_error;
+  slex_init_context(&lexer, buf, buf + buf_size, store, 1024);
+  int prev_tok_ty = SLEX_ERR_unknown_tok;
 
-  while (stb_c_lexer_get_token(&lexer)) {
-    char *tok = lexer.where_firstchar;
-    int tok_len = lexer.where_lastchar - lexer.where_firstchar + 1;
-    int tok_ty = lexer.token;
+  for(;;) {
+    if(!slex_get_next_token(&lexer)) {
+      int ln;
+      int col;
+      slex_get_parse_ptr_location(&lexer, buf, &ln, &col);
+      fprintf(stderr, "Error: File contains an error at %d:%d", ln, col);
+      exit(1);
+    }
 
+    int tok_ty = lexer.tok_ty;
+    if(tok_ty == SLEX_TOK_eof) break;
+
+    char *tok = lexer.first_tok_char;
+    int tok_len = lexer.last_tok_char - lexer.first_tok_char + 1;
     char tmp[256];
 
-    if (tok_ty == CLEX_id && can_rename_id(tok, tok_len)) {
+    if (tok_ty == SLEX_TOK_identifier && can_rename_id(tok, tok_len)) {
       int found_off = find_renamed_id(tok, tok_len);
       if (found_off == -1) {
         found_off = conv_table_len;
@@ -214,7 +224,6 @@ int main(int argc, char **argv) {
   char *buf = malloc(fsize + 1);
   fread(buf, 1, fsize, fd);
   fclose(fd);
-  buf[fsize] = '\0';
 
   struct StrBuf obfuscated_contents = obfuscate(buf, fsize, max_line_len);
   free(buf);
